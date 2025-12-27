@@ -1,0 +1,42 @@
+name: Doc-Drift Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Build Core
+        run: pnpm --filter @doc-drift/core build
+
+      - name: Build Action
+        run: pnpm --filter @doc-drift/action build
+
+      - name: Run Doc-Drift Action (Self-Test)
+        # We run the built action script directly using node
+        # This simulates the action running in the repo
+        run: node apps/action/dist/index.js
+        env:
+          GITHUB_WORKSPACE: ${{ github.workspace }}
+          INPUT_CONFIG: .doc-drift.yaml
+          INPUT_STRICT: false

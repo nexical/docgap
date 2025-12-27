@@ -1,0 +1,12 @@
+name: 'Doc-Drift Check'
+description: 'Detect stale documentation in your Pull Requests.'
+inputs:
+  config:
+    description: 'Path to config file'
+    default: '.doc-drift.yaml'
+  strict:
+    description: 'Fail build on drift'
+    default: 'false'
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
