@@ -1,0 +1,9 @@
+{
+  "name": "doc-drift-monorepo",
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test"
+  },
+  "packageManager": "pnpm@9.0.0"
+}
