@@ -30,8 +30,15 @@ async function loadConfig(cwd: string): Promise<DocDriftConfig> {
 /**
  * Runs the drift analysis for the project in the given directory.
  */
-export async function runAnalysis(cwd: string): Promise<FileCheckResult[]> {
-    const config = await loadConfig(cwd);
+/**
+ * Runs the drift analysis for the project in the given directory.
+ * @param cwd Current working directory
+ * @param config Optional configuration object. If not provided, loads from default path.
+ */
+export async function runAnalysis(cwd: string, config?: DocDriftConfig): Promise<FileCheckResult[]> {
+    if (!config) {
+        config = await loadConfig(cwd);
+    }
 
     // Collect all tasks
     const tasks: Promise<FileCheckResult>[] = [];
@@ -65,7 +72,7 @@ export async function runAnalysis(cwd: string): Promise<FileCheckResult[]> {
             });
 
             tasks.push(
-                limit(() => checkDrift(docFile, sourceFiles, config))
+                limit(() => checkDrift(docFile, sourceFiles, config!))
             );
         }
     }

@@ -1,0 +1,26 @@
+{
+    "name": "@doc-drift/cli",
+    "version": "0.0.0",
+    "description": "CLI for Doc-Drift",
+    "type": "module",
+    "bin": {
+        "doc-drift": "./dist/index.js"
+    },
+    "scripts": {
+        "build": "tsup",
+        "dev": "tsup --watch",
+        "start": "node dist/index.js",
+        "lint": "tsc --noEmit"
+    },
+    "dependencies": {
+        "cac": "^6.7.14",
+        "picocolors": "^1.0.1",
+        "cli-table3": "^0.6.3",
+        "@doc-drift/core": "workspace:*"
+    },
+    "devDependencies": {
+        "tsup": "^8.0.1",
+        "typescript": "^5.3.3",
+        "@types/node": "^20.10.6"
+    }
+}
