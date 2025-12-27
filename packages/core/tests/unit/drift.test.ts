@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { checkDrift } from '../src/drift.js';
-import { DocDriftConfig } from '../src/config.js';
+import { checkDrift } from '../../src/drift.js';
+import { DocDriftConfig } from '../../src/config.js';
 
 // Mocks
 const { mockLog, mockShow, mockCheckIsRepo, mockReadFile } = vi.hoisted(() => ({
@@ -185,7 +185,60 @@ describe('Core Drift Check', () => {
         const result = await checkDrift('doc.md', ['code.ts'], config);
 
         expect(result.status).toBe('FRESH');
-        // Verify we checked content at the DOC's commit hash
         expect(mockShow).toHaveBeenCalledWith(['hash_doc_t1:code.ts']);
+    });
+
+    it('Status is UNKNOWN if doc has no history', async () => {
+        // Doc has NO history
+        mockLog.mockResolvedValueOnce({ all: [] });
+
+        const result = await checkDrift('new-doc.md', ['code.ts'], config);
+
+        expect(result.status).toBe('UNKNOWN');
+        expect(result.driftReason).toContain('No git history');
+    });
+
+    it('Skips source files with no history', async () => {
+        // Doc updated
+        mockLog.mockResolvedValueOnce({
+            all: [createCommit('doc update', '2023-01-01T00:00:00Z')],
+        });
+
+        // Code has NO history (e.g. new file)
+        // first call for doc, second for code
+        mockLog.mockResolvedValueOnce({ all: [] });
+
+        const result = await checkDrift('doc.md', ['new-code.ts'], config);
+
+        expect(result.status).toBe('FRESH'); // Should ignore the new file
+    });
+
+    it('Handles undefined semantic config (defaults to enabled=true, strict=false)', async () => {
+        const minimalConfig = {
+            rules: [],
+            ignore: []
+            // semantic is undefined
+        } as unknown as DocDriftConfig;
+
+        // Doc updated at T1
+        mockLog.mockResolvedValueOnce({
+            all: [createCommit('doc update', '2023-01-01T00:00:00Z', 'hash_doc')],
+        });
+        // Code updated at T2 (Newer)
+        mockLog.mockResolvedValueOnce({
+            all: [createCommit('code update', '2023-02-01T00:00:00Z', 'hash_code')],
+        });
+
+        // Content at T1
+        mockShow.mockResolvedValue('content');
+        // Content at T2 (Same content)
+        mockReadFile.mockResolvedValue('content');
+
+        // Should perform semantic check (enabled by default) and pass (same content)
+        const result = await checkDrift('doc.md', ['code.ts'], minimalConfig);
+
+        expect(result.status).toBe('FRESH');
+        expect(mockShow).toHaveBeenCalled(); // proving semantic check ran
+        expect(mockReadFile).toHaveBeenCalled();
     });
 });

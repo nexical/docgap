@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getEffectiveFileUpdate } from '../src/analysis/timestamp.js';
-import { DocDriftConfig } from '../src/config.js';
+import { getEffectiveFileUpdate } from '../../src/analysis/timestamp.js';
+import { DocDriftConfig } from '../../src/config.js';
 
 // 1. Setup Mocks
 const { mockLog, mockCheckIsRepo } = vi.hoisted(() => {
@@ -95,5 +95,15 @@ describe('Git Analysis Layer', () => {
         mockCheckIsRepo.mockResolvedValue(false);
         await expect(getEffectiveFileUpdate('test.ts', defaultConfig))
             .rejects.toThrow('Current directory is not a git repository');
+    });
+
+    it('Wraps generic git errors', async () => {
+        // Mock checkIsRepo true
+        mockCheckIsRepo.mockResolvedValue(true);
+        // Mock log throwing generic error
+        mockLog.mockRejectedValue(new Error('Unknown git error'));
+
+        await expect(getEffectiveFileUpdate('test.ts', defaultConfig))
+            .rejects.toThrow('Failed to fetch commit history');
     });
 });

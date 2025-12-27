@@ -41,9 +41,22 @@ cli
 cli.help();
 cli.version(packageJson.version);
 
-try {
-    cli.parse();
-} catch (error: any) {
-    console.error(error.message);
-    process.exit(1);
+export { cli };
+
+export function bootstrap() {
+    try {
+        cli.parse();
+    } catch (error: any) {
+        console.error(error.message);
+        process.exit(1);
+    }
+}
+
+// Only run if called directly
+import { fileURLToPath } from 'url';
+// Export for testing
+export const _isMain = (argv1: string, metaUrl: string) => argv1 === fileURLToPath(metaUrl);
+
+if (_isMain(process.argv[1], import.meta.url)) {
+    bootstrap();
 }

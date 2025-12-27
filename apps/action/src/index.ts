@@ -3,7 +3,7 @@ import * as github from '@actions/github';
 import path from 'path';
 import { runAnalysis, loadConfigFromPath, FileCheckResult } from '@doc-drift/core';
 
-async function run() {
+export async function run() {
     try {
         const configPathInput = core.getInput('config') || '.doc-drift.yaml';
         const strict = core.getInput('strict') === 'true';
@@ -66,4 +66,7 @@ async function run() {
     }
 }
 
-run();
+// Only run if called directly
+if (require.main === module) {
+    run();
+}

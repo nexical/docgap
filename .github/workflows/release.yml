@@ -1,0 +1,87 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  npm-publish:
+    name: Publish to NPM
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      # Only publish nicely if we are detecting a change, but since we are doing manual dispatch or push to main,
+      # we can try to publish and fail gracefully if version exists, or check version.
+      # For now, we will just attempt publish.
+      - name: Publish CLI
+        if: github.repository == 'doc-drift/doc-drift' # Replace with actual repo if known, good safety
+        run: |
+          cd apps/cli
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        continue-on-error: true # Don't fail the workflow if version already exists on push to main
+
+  action-release:
+    name: Release GitHub Action
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Action
+        run: |
+          cd apps/action
+          pnpm build
+
+      - name: Commit and Push dist
+        # We only want to commit the compiled dist for the action
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Force add the apps/action/dist folder
+          git add -f apps/action/dist
+          
+          # Check if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore(action): update bundled action [skip ci]"
+            # Push to a separate branch or update the v1 tag.
+            # Updating a major version tag like v1 is common for actions.
+            
+            git tag -fa v1 -m "Update v1 tag"
+            git push origin v1 --force
+          fi

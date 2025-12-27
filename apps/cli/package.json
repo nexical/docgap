@@ -6,11 +6,19 @@
     "bin": {
         "doc-drift": "./dist/index.js"
     },
+    "files": [
+        "dist"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
     "scripts": {
         "build": "tsup",
         "dev": "tsup --watch",
         "start": "node dist/index.js",
-        "lint": "tsc --noEmit"
+        "lint": "tsc --noEmit",
+        "test:unit": "vitest run tests/unit --coverage",
+        "prepublishOnly": "npm run build"
     },
     "dependencies": {
         "@doc-drift/core": "workspace:*",

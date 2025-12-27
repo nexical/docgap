@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ConfigSchema } from '../src/config.js';
+import { ConfigSchema } from '../../src/config.js';
 
 describe('ConfigSchema', () => {
     it('parses a valid complete config', () => {
