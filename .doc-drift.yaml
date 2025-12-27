@@ -1,0 +1,26 @@
+ignore:
+  - "node_modules"
+  - "dist"
+  - ".git"
+
+rules:
+  # Rule 1: Architecture tracks core logic
+  - doc: "docs/architecture.md"
+    source: "packages/core/src/**/*.ts"
+
+  # Rule 2: Configuration tracks the config definition
+  - doc: "docs/configuration.md"
+    source: "packages/core/src/config.ts"
+
+  # Rule 3: README tracks the CLI entry point
+  - doc: "README.md"
+    source: "apps/cli/src/index.ts"
+
+git:
+  ignoreCommitPatterns:
+    - "^chore:"
+    - "^style:"
+    - "^ci:"
+
+semantic:
+  enabled: true
