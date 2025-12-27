@@ -13,14 +13,16 @@
         "lint": "tsc --noEmit"
     },
     "dependencies": {
+        "@doc-drift/core": "workspace:*",
         "cac": "^6.7.14",
-        "picocolors": "^1.0.1",
         "cli-table3": "^0.6.3",
-        "@doc-drift/core": "workspace:*"
+        "ora": "^8.0.0",
+        "picocolors": "^1.0.1",
+        "yaml": "^2.8.2"
     },
     "devDependencies": {
+        "@types/node": "^20.10.6",
         "tsup": "^8.0.1",
-        "typescript": "^5.3.3",
-        "@types/node": "^20.10.6"
+        "typescript": "^5.3.3"
     }
 }

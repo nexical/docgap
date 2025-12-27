@@ -16,14 +16,27 @@ const limit = pLimit(10);
 /**
  * Loads configuration from doc-drift.config.json in the current working directory.
  */
+import { parse } from 'yaml';
+
+/**
+ * Loads configuration from .doc-drift.yaml in the current working directory.
+ */
 async function loadConfig(cwd: string): Promise<DocDriftConfig> {
-    const configPath = path.join(cwd, 'doc-drift.config.json');
+    const configPath = path.join(cwd, '.doc-drift.yaml');
     try {
         const content = await fs.readFile(configPath, 'utf8');
-        const json = JSON.parse(content);
+        const json = parse(content);
         return ConfigSchema.parse(json);
     } catch (error) {
-        throw new Error(`Failed to load config from ${configPath}: ${error}`);
+        // Fallback to json if needed or throw
+        const jsonPath = path.join(cwd, 'doc-drift.config.json');
+        try {
+            const content = await fs.readFile(jsonPath, 'utf8');
+            const json = JSON.parse(content);
+            return ConfigSchema.parse(json);
+        } catch {
+            throw new Error(`Failed to load config from ${configPath} or ${jsonPath}: ${error}`);
+        }
     }
 }
 

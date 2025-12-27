@@ -13,6 +13,7 @@
         "p-limit": "^7.2.0",
         "picomatch": "^3.0.1",
         "simple-git": "^3.30.0",
+        "yaml": "^2.8.2",
         "zod": "^3.22.4"
     },
     "devDependencies": {

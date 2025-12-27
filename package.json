@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "build": "pnpm -r build",
-    "test": "pnpm -r test"
+    "test": "pnpm -r test",
+    "start:cli": "node apps/cli/dist/index.js"
   },
   "packageManager": "pnpm@9.0.0"
 }
