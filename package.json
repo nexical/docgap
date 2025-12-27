@@ -1,13 +1,11 @@
 {
-  "name": "doc-drift-monorepo",
-  "private": true,
+  "name": "doc-drift",
   "scripts": {
     "build": "pnpm -r build",
-    "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
     "test:unit": "vitest run tests/unit --coverage",
     "test:integration": "vitest run tests/integration",
     "test:e2e": "vitest run tests/e2e",
+    "test": "pnpm run test:unit && pnpm run test:integration && pnpm run test:e2e",
     "start:cli": "node apps/cli/dist/index.js"
   },
   "packageManager": "pnpm@9.0.0",
