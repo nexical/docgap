@@ -49,13 +49,7 @@ async function loadConfig(cwd: string): Promise<DocGapConfig> {
     try {
         return await loadConfigFromPath(configPath);
     } catch (error) {
-        // Fallback to json if needed or throw
-        const jsonPath = path.join(cwd, 'docgap.config.json');
-        try {
-            return await loadConfigFromPath(jsonPath);
-        } catch {
-            throw new Error(`Failed to load config from ${configPath} or ${jsonPath}: ${error}`);
-        }
+        throw new Error(`Failed to load config from ${configPath}: ${error}`);
     }
 }
 

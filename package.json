@@ -10,6 +10,7 @@
   },
   "packageManager": "pnpm@9.0.0",
   "devDependencies": {
+    "@docgap/cli": "workspace:*",
     "@vitest/coverage-v8": "^1.1.3",
     "vitest": "^1.1.3"
   }

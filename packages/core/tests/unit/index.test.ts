@@ -95,20 +95,7 @@ rules: []
             expect(fg).toHaveBeenLastCalledWith(['s1', 's2'], expect.anything());
         });
 
-        it('falls back to json config if yaml fails', async () => {
-            // yaml fails
-            vi.mocked(fs.readFile).mockRejectedValueOnce(new Error('no yaml'));
-            // json succeeds
-            vi.mocked(fs.readFile).mockResolvedValueOnce(JSON.stringify({
-                rules: []
-            }));
-            vi.mocked(fg).mockResolvedValue([]);
-
-            await runAnalysis('/cwd');
-            expect(fs.readFile).toHaveBeenCalledTimes(2);
-        });
-
-        it('throws if both yaml and json fail', async () => {
+        it('throws if yaml fails', async () => {
             vi.mocked(fs.readFile).mockRejectedValue(new Error('no file'));
 
             await expect(runAnalysis('/cwd')).rejects.toThrow('Failed to load config');

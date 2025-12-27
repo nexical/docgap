@@ -8,7 +8,7 @@ const cli = cac('docgap');
 
 cli
     .command('check [cwd]', 'Check documentation drift in the specified directory')
-    .option('--config <path>', 'Path to config file (default: docgap.config.json)')
+    .option('--config <path>', 'Path to config file (default: .docgap.yaml)')
     .option('--strict', 'Exit with code 1 if any drift is detected (useful for CI/CD)')
     .option('--coverage', 'Enable coverage reporting for documented entities')
     .example('  docgap check')
@@ -23,7 +23,7 @@ cli
 // Default command alias to check for convenience (optional, but good DX)
 cli
     .command('[cwd]', 'Check documentation drift (default)')
-    .option('--config <path>', 'Path to config file (default: docgap.config.json)')
+    .option('--config <path>', 'Path to config file (default: .docgap.yaml)')
     .option('--strict', 'Exit with code 1 if any drift is detected (useful for CI/CD)')
     .option('--coverage', 'Enable coverage reporting for documented entities')
     .action(async (cwd, options) => {
@@ -58,7 +58,17 @@ export function bootstrap() {
 // Only run if called directly
 import { fileURLToPath } from 'url';
 // Export for testing
-export const _isMain = (argv1: string, metaUrl: string) => argv1 === fileURLToPath(metaUrl);
+import { realpathSync } from 'fs';
+
+// Export for testing
+export const _isMain = (argv1: string, metaUrl: string) => {
+    const scriptPath = fileURLToPath(metaUrl);
+    try {
+        return argv1 === scriptPath || realpathSync(argv1) === scriptPath;
+    } catch {
+        return argv1 === scriptPath;
+    }
+};
 
 // istanbul ignore next
 /* v8 ignore next 3 */
