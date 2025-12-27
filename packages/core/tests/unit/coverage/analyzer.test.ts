@@ -3,22 +3,29 @@ import { describe, it, expect, vi } from 'vitest';
 import { CoverageAnalyzer } from '../../../src/coverage/analyzer.js';
 import { getProfile } from '../../../src/coverage/languages.js';
 
-// Mock fs to return file content
-vi.mock('node:fs/promises', () => ({
-    default: {
-        readFile: vi.fn().mockImplementation(async (path) => {
-            if (path.endsWith('.py')) {
-                return `
+import fs from 'node:fs/promises';
+
+const { mockReadFile } = vi.hoisted(() => ({
+    mockReadFile: vi.fn().mockImplementation(async (path: string) => {
+        if (path.endsWith('.py')) {
+            return `
 class User
     def getName
     def setName
 class Auth
     def login
 `;
-            }
-            return '';
-        })
-    }
+        }
+        return '';
+    }),
+}));
+
+// Mock fs to return file content
+vi.mock('node:fs/promises', () => ({
+    default: {
+        readFile: mockReadFile,
+    },
+    readFile: mockReadFile,
 }));
 
 describe('CoverageAnalyzer', () => {
@@ -40,6 +47,16 @@ class User
     });
 
     describe('analyze', () => {
+        it('should return 1 score if no entities found in source file', async () => {
+            // Mock empty file content for a valid extension
+            mockReadFile.mockResolvedValueOnce('');
+
+            const report = await CoverageAnalyzer.analyze('test.py', '');
+            // No entities -> score 1 (compliant by default as nothing to verify)
+            expect(report.score).toBe(1);
+            expect(report.missing).toHaveLength(0);
+        });
+
         it('should calculate coverage score correctly', async () => {
             const docContent = "The User class has a getName method.";
             const report = await CoverageAnalyzer.analyze('test.py', docContent);
@@ -66,5 +83,7 @@ class User
             expect(report.score).toBe(0);
             expect(report.present).toHaveLength(0);
         });
+
+
     });
 });

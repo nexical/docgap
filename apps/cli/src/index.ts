@@ -60,6 +60,8 @@ import { fileURLToPath } from 'url';
 // Export for testing
 export const _isMain = (argv1: string, metaUrl: string) => argv1 === fileURLToPath(metaUrl);
 
+// istanbul ignore next
+/* v8 ignore next 3 */
 if (_isMain(process.argv[1], import.meta.url)) {
     bootstrap();
 }

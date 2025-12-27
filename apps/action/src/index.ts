@@ -67,6 +67,8 @@ export async function run() {
 }
 
 // Only run if called directly
+// istanbul ignore next
+/* v8 ignore next 3 */
 if (require.main === module) {
     run();
 }

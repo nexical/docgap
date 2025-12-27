@@ -102,4 +102,99 @@ describe('handleCheck', () => {
 
         expect(runAnalysis).toHaveBeenCalledWith(process.cwd(), undefined);
     });
+    it('calculates coverage if enabled', async () => {
+        const results = [{
+            docPath: 'doc.md', sourceFiles: ['code.ts'], status: 'FRESH'
+        }] as any;
+        vi.mocked(runAnalysis).mockResolvedValue(results);
+
+        // Mock fs reading the doc content
+        vi.mocked(fs.readFile).mockResolvedValue('content');
+
+        // Mock analyzer
+        const { CoverageAnalyzer } = await import('@doc-drift/core');
+
+        // Ensure analyze is a mock
+        // Since we mocked @doc-drift/core at top level, CoverageAnalyzer should be a mock.
+        // Static methods on the mocked class should also be mocks.
+        vi.mocked(CoverageAnalyzer.analyze).mockResolvedValue({
+            file: 'code.ts',
+            score: 0.5,
+            missing: [{ name: 'foo', kind: 'function', line: 1 }],
+            present: []
+        });
+
+        await handleCheck('/cwd', { coverage: true });
+
+        expect(view.spinner.start).toHaveBeenCalledWith(expect.stringContaining('Calculating coverage'));
+        expect(CoverageAnalyzer.analyze).toHaveBeenCalled();
+        expect(view.renderCoverage).toHaveBeenCalled();
+        // Check that report was passed (mock implementation of renderCoverage validation or spy?)
+        // Since renderCoverage is a real function (imported), we relying on its side-effects or mock?
+        // Wait, view.js is NOT mocked fully? 
+        // In this test file:
+        // vi.mock('../../src/view.js');
+        // So view.renderCoverage IS a mock.
+        expect(view.renderCoverage).toHaveBeenCalledWith(
+            expect.arrayContaining([expect.objectContaining({ score: 0.5 })]),
+            expect.any(String)
+        );
+    });
+
+    it('skips missing doc files during coverage', async () => {
+        vi.mocked(runAnalysis).mockResolvedValue([{
+            docPath: 'missing.md', sourceFiles: ['code.ts'], status: 'FRESH'
+        }] as any);
+
+        // First call to readFile (config) is handled? No config provided.
+        // runAnalysis called.
+        // Then loop results.
+        // readFile for doc content fails.
+        vi.mocked(fs.readFile).mockRejectedValueOnce(new Error('ENOENT'));
+
+        await handleCheck('/cwd', { coverage: true });
+
+        // Should not crash, just skip
+        const { CoverageAnalyzer } = await import('@doc-drift/core');
+        expect(CoverageAnalyzer.analyze).not.toHaveBeenCalled();
+    });
+
+    it('ignores analysis errors during coverage', async () => {
+        vi.mocked(runAnalysis).mockResolvedValue([{
+            docPath: 'doc.md', sourceFiles: ['code.ts'], status: 'FRESH'
+        }] as any);
+
+        vi.mocked(fs.readFile).mockResolvedValue('content');
+
+        const { CoverageAnalyzer } = await import('@doc-drift/core');
+        vi.mocked(CoverageAnalyzer.analyze).mockRejectedValue(new Error('Analysis error'));
+
+        await handleCheck('/cwd', { coverage: true });
+
+        // Should finish and render coverage (empty likely)
+        expect(view.renderCoverage).toHaveBeenCalledWith([], expect.any(String));
+    });
+
+    it('includes reports with only present entities', async () => {
+        vi.mocked(runAnalysis).mockResolvedValue([{
+            docPath: 'doc.md', sourceFiles: ['code.ts'], status: 'FRESH'
+        }] as any);
+
+        vi.mocked(fs.readFile).mockResolvedValue('text');
+
+        const { CoverageAnalyzer } = await import('@doc-drift/core');
+        vi.mocked(CoverageAnalyzer.analyze).mockResolvedValue({
+            file: 'code.ts',
+            score: 0.5,
+            missing: [],
+            present: [{ name: 'foo', kind: 'function', line: 1 }]
+        });
+
+        await handleCheck('/cwd', { coverage: true });
+
+        expect(view.renderCoverage).toHaveBeenCalledWith(
+            expect.arrayContaining([expect.objectContaining({ present: expect.any(Array) })]),
+            expect.any(String)
+        );
+    });
 });
