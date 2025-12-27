@@ -17,7 +17,7 @@
 To run a drift check locally:
 
 ```bash
-npx doc-drift
+npx doc-drift check
 ```
 
 ### CI
@@ -29,7 +29,35 @@ steps:
   - uses: actions/checkout@v4
     with:
       fetch-depth: 0 # Important: Required for deep Git history analysis
-  - uses: your-org/doc-drift-action@v1
+  - uses: nexical/doc-drift@v1
+```
+
+## Configuration
+
+`doc-drift` is configured via a `.doc-drift.yaml` file in the root of your project.
+
+```yaml
+# Global ignore patterns for file scanning
+ignore:
+  - "node_modules"
+  - "dist"
+
+rules:
+  # Map a documentation file to one or more source files
+  - doc: "README.md"
+    source: "src/**/*.ts" # Supports glob patterns
+
+  - doc: "docs/api.md"
+    source:
+      - "src/api/client.ts"
+      - "src/api/server.ts"
+
+git:
+  # Commits matching these regex patterns are ignored during Phase 1
+  ignoreCommitPatterns:
+    - "^chore:"
+    - "^style:"
+    - "^test:"
 ```
 
 ## How It Works: Finding "Rot"
@@ -38,7 +66,9 @@ Documentation **Rot** (or Drift) is the silent killer of developer productivity.
 
 `doc-drift` identifies this rot through a sophisticated two-phase process:
 
-1.  **Temporal Analysis**: It scans your Git history to find the last time your documentation was touched versus the last time the source code it references was modified.
-2.  **Semantic Filtering**: It doesn't just look at timestamps. It filters out "noise" commits (like `chore:`, `style:`) and uses AST hashing to determine if the *logic* of the code effectively changed.
+1.  **Phase 1 (Git)**: Checks for source commits newer than doc commits. It intelligently ignores noise by filtering out commits that match ignored patterns (e.g., `chore`, `test`, `style`).
+2.  **Phase 2 (Semantic)**: If drift is suspected, it performs a deep comparison using AST/Signature hashing.
+    *   It computes a hash of the "Old" state (at the time of the last doc update) and the "New" state (current HEAD).
+    *   If `Hash(Old) === Hash(New)`, the change is considered **FRESH** (no meaningful change), safely ignoring comments, whitespace, and formatting differences.
 
-If the code has moved forward but the docs are stuck in the past, `doc-drift` flags it as **DRIFT** and hinders the build (or warns based on config), prompting you to update the documentation or verify that the changes were indeed trivial.
+If the code has moved forward and the logic has changed, `doc-drift` flags it as **DRIFT** and hinders the build (or warns based on config), prompting you to update the documentation.

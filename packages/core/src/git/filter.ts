@@ -1,19 +1,22 @@
 import { GitCommit } from './types.js';
 
+const NORMALIZED_COMMIT_NOISE = /^(chore|style|test|ci|build)(\(.*\))?:/i;
+
 export function filterMeaningfulCommits(
     commits: GitCommit[],
     ignorePatterns: string[] = []
 ): GitCommit[] {
-    if (ignorePatterns.length === 0) {
-        return commits;
-    }
-
-    const regexes = ignorePatterns.map((pattern) => new RegExp(pattern));
+    const userRegexes = ignorePatterns.map((pattern) => new RegExp(pattern));
 
     return commits.filter((commit) => {
+        // 1. Check standard noise (Conventional Commits)
+        if (NORMALIZED_COMMIT_NOISE.test(commit.message)) {
+            return false;
+        }
+
+        // 2. Check user-defined ignore patterns (config)
         // If ANY regex matches the message, we exclude (filter out) the commit.
-        // So we keep it if NO regex matches.
-        const isIgnored = regexes.some((regex) => regex.test(commit.message));
+        const isIgnored = userRegexes.some((regex) => regex.test(commit.message));
         return !isIgnored;
     });
 }

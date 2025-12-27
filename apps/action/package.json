@@ -1,7 +1,7 @@
 {
     "name": "@doc-drift/action",
     "private": true,
-    "version": "0.0.0",
+    "version": "0.1.0",
     "main": "dist/index.js",
     "scripts": {
         "build": "ncc build src/index.ts -o dist --license licenses.txt",

@@ -12,9 +12,12 @@ rules:
   - doc: "docs/configuration.md"
     source: "packages/core/src/config.ts"
 
-  # Rule 3: README tracks the CLI entry point
+  # Rule 3: README tracks the core detection logic and hashing algorithm
+  # Rationale: If the core detection logic or hashing algorithm changes, the main documentation implies a change in behavior/features and should be flagged.
   - doc: "README.md"
-    source: "apps/cli/src/index.ts"
+    source: 
+      - "packages/core/src/drift.ts"
+      - "packages/core/src/analysis/hasher.ts"
 
 git:
   ignoreCommitPatterns:

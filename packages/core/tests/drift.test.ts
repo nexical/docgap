@@ -149,4 +149,43 @@ describe('Core Drift Check', () => {
         expect(mockShow).not.toHaveBeenCalled();
         expect(mockReadFile).not.toHaveBeenCalled();
     });
+
+    it('Status is FRESH if only comments changed (Phase 2)', async () => {
+        // Doc updated at T1
+        mockLog.mockResolvedValueOnce({
+            all: [createCommit('doc update', '2023-01-01T00:00:00Z', 'hash_doc_t1')],
+        });
+        // Code updated at T2 (Newer)
+        mockLog.mockResolvedValueOnce({
+            all: [createCommit('comment update', '2023-02-01T00:00:00Z', 'hash_code_t2')],
+        });
+
+        // Content at T1 (Doc time) - Git Show
+        mockShow.mockResolvedValue(`
+            function foo() {
+                // Return 1
+                return 1;
+            }
+        `);
+
+        // Content at T2 (Current FS) - Changed comments, added block comment
+        mockReadFile.mockResolvedValue(`
+            /**
+             * returns one
+             */
+            function foo() {
+                // Just returning 1 here
+                return 1; 
+            }
+        `);
+
+        // Expectation: Semantically the code is: function foo() { return 1; }
+        // So statuses should match.
+
+        const result = await checkDrift('doc.md', ['code.ts'], config);
+
+        expect(result.status).toBe('FRESH');
+        // Verify we checked content at the DOC's commit hash
+        expect(mockShow).toHaveBeenCalledWith(['hash_doc_t1:code.ts']);
+    });
 });

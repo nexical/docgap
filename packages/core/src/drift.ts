@@ -2,7 +2,7 @@ import { DocDriftConfig } from './config.js';
 import { FileCheckResult } from './types.js';
 import { getEffectiveFileUpdate } from './analysis/timestamp.js';
 import { getFileContent, getFileContentAtCommit } from './git/content.js';
-import { generateSignature } from './analysis/hasher.js';
+import { getSemanticHash } from './analysis/hasher.js';
 
 export async function checkDrift(
     docPath: string,
@@ -51,8 +51,8 @@ export async function checkDrift(
                 // We compare against the state of the code when the doc was last updated.
                 const sourceOld = await getFileContentAtCommit(sourceFile, t_doc.hash);
 
-                const sigCurrent = generateSignature(sourceCurrent);
-                const sigOld = generateSignature(sourceOld);
+                const sigCurrent = getSemanticHash(sourceCurrent);
+                const sigOld = getSemanticHash(sourceOld);
 
                 if (sigCurrent === sigOld) {
                     // Match -> FRESH (False alarm, only formatting changed)

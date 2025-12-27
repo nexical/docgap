@@ -40,8 +40,8 @@ export async function handleCheck(cwd: string, options: { config?: string; stric
         const staleCount = results.filter((r) => r.status === 'STALE_TIMESTAMP' || r.status === 'STALE_SEMANTIC').length;
         renderMarketing({ total: results.length, stale: staleCount });
 
-        if (options.strict && staleCount > 0) {
-            console.log(pc.bold(pc.red('\n[STRICT MODE] Drift detected. Exiting with error.')));
+        if (staleCount > 0) {
+            // Check command should fail if drift is detected for CI/Hooks
             process.exit(1);
         }
     } catch (error: any) {
