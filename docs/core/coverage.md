@@ -60,3 +60,13 @@ $$ Score = \frac{Count_{Present}}{Count_{Present} + Count_{Missing}} $$
 *   **1.0 (100%)**: All entities are mentioned.
 *   **0.0 (0%)**: No entities are mentioned.
 *   **Results**: The system outputs a `CoverageReport` containing the lists of missing and present entities, allowing users to see exactly what to document.
+
+## Internal Helpers
+
+The analyzer implementation in `packages/core/src/coverage/analyzer.ts` uses several helper functions:
+
+- `runRepomix`: Executes the repomix tool with the specific XML configuration.
+- `parseRepomixOutput`: Handles the extraction of file content from the raw XML string.
+- `methodRegex`: The specific regex pattern used to detect method signatures.
+- `escapeRegExp`: Utility to safely create regex patterns from entity names.
+
