@@ -1,5 +1,6 @@
 {
   "name": "docgap",
+  "type": "module",
   "scripts": {
     "build": "pnpm -r build",
     "test:unit": "vitest run tests/unit --coverage",

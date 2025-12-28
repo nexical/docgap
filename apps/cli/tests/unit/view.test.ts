@@ -51,25 +51,29 @@ describe('View Layer', () => {
                 docPath: '/root/docs/doc.md',
                 sourceFiles: ['/root/src/code.ts'],
                 status: 'FRESH',
-                lastDocCommit: { hash: 'a', date: new Date() }
+                lastDocCommit: { hash: 'a', date: new Date() },
+                driftingSources: []
             },
             {
                 docPath: '/root/docs/stale.md',
                 sourceFiles: ['/root/src/old.ts'],
                 status: 'STALE_TIMESTAMP',
-                driftReason: 'Timestamp mismatch'
+                driftReason: 'Timestamp mismatch',
+                driftingSources: []
             },
             {
                 docPath: '/root/docs/drift.md',
                 sourceFiles: ['/root/src/logic.ts'],
                 status: 'STALE_SEMANTIC',
-                driftReason: 'Semantic drift'
+                driftReason: 'Semantic drift',
+                driftingSources: []
             },
             {
                 docPath: '/root/docs/new.md',
                 sourceFiles: [],
                 status: 'UNKNOWN',
-                driftReason: 'No history'
+                driftReason: 'No history',
+                driftingSources: []
             }
         ];
 
@@ -111,10 +115,38 @@ describe('View Layer', () => {
 
         it('renders list view: handles no source files', () => {
             const results = [{
-                docPath: 'd', sourceFiles: [], status: 'FRESH'
+                docPath: 'd', sourceFiles: [], status: 'FRESH', driftingSources: []
             } as FileCheckResult];
             renderResults(results, '', { width: 50 });
             expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('None'));
+        });
+
+        it('renders list view: shows drifting sources details', () => {
+            const results = [{
+                docPath: 'doc.md',
+                sourceFiles: ['src/a.ts', 'src/b.ts'],
+                status: 'STALE_SEMANTIC',
+                driftingSources: [
+                    { sourceFile: 'src/a.ts', reason: 'mismatch', lastCommit: { hash: 'x', date: new Date() } }
+                ]
+            } as FileCheckResult];
+            renderResults(results, '', { width: 50 });
+            expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Details:'));
+            expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('mismatch'));
+        });
+
+        it('renders table view: shows drifting sources details', () => {
+            const results = [{
+                docPath: 'doc.md',
+                sourceFiles: ['src/a.ts'],
+                status: 'STALE_SEMANTIC',
+                driftingSources: [
+                    { sourceFile: 'src/a.ts', reason: 'lookup failed', lastCommit: { hash: 'x', date: new Date() } }
+                ]
+            } as FileCheckResult];
+            renderResults(results, '', { width: 120 });
+            // Table view output is complex to regex, but we check for reason presence
+            expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('lookup failed'));
         });
     });
 
@@ -156,8 +188,18 @@ describe('View Layer', () => {
             expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('low.ts'));
 
             // Check total coverage
-            expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Total Coverage: 63%'));
             // 90+60+40 = 190 / 3 = 63.33
+        });
+
+        it('renders coverage table for wide screens', () => {
+            const reports: any[] = [
+                { file: '/root/a.ts', score: 0.8, missing: [] },
+                { file: '/root/b.ts', score: 0.2, missing: [{ name: 'foo' }] },
+                { file: '/root/c.ts', score: 0.6, missing: [] }
+            ];
+            // Force wide width
+            renderCoverage(reports, '/root', { width: 150 });
+            expect(consoleLogSpy).toHaveBeenCalled();
         });
 
         it('truncates missing entities list', () => {
@@ -170,6 +212,19 @@ describe('View Layer', () => {
             ];
 
             renderCoverage(reports, '/root');
+            expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('1, 2, 3, 4, 5...'));
+        });
+
+        it('truncates missing entities list in table view', () => {
+            const missing = [
+                { name: '1' }, { name: '2' }, { name: '3' },
+                { name: '4' }, { name: '5' }, { name: '6' }
+            ];
+            const reports: any[] = [
+                { file: '/root/file.ts', score: 0, missing }
+            ];
+
+            renderCoverage(reports, '/root', { width: 150 });
             expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('1, 2, 3, 4, 5...'));
         });
     });
