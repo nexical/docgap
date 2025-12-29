@@ -69,9 +69,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build Action
-        run: |
-          cd apps/action
-          pnpm build
+        run: pnpm --filter @docgap/action... build
 
       - name: Commit and Push dist
         # We only want to commit the compiled dist for the action
