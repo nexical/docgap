@@ -1,5 +1,5 @@
 {
-    "name": "@docgap/cli",
+    "name": "@nexical/docgap",
     "version": "0.1.0",
     "description": "CLI for DocGap",
     "type": "module",

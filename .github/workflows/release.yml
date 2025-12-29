@@ -37,10 +37,18 @@ jobs:
         if: github.repository == 'nexical/docgap' # Replace with actual repo if known, good safety
         run: |
           cd apps/cli
-          npm publish --access public
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          
+          # Check if version exists on NPM (suppress output, just check exit code)
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" > /dev/null 2>&1; then
+            echo "Version $PACKAGE_VERSION of $PACKAGE_NAME already exists on NPM. Skipping publish."
+          else
+            echo "Publishing $PACKAGE_NAME@$PACKAGE_VERSION..."
+            npm publish --access public
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        continue-on-error: true # Don't fail the workflow if version already exists on push to main
 
   action-release:
     name: Release GitHub Action
