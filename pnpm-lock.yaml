@@ -8,7 +8,7 @@ importers:
 
   .:
     devDependencies:
-      '@docgap/cli':
+      '@nexical/docgap':
         specifier: workspace:*
         version: link:apps/cli
       '@vitest/coverage-v8':

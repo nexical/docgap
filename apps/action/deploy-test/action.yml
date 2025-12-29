@@ -1,0 +1,15 @@
+name: 'DocGap Check'
+description: 'Detect stale documentation in your Pull Requests.'
+inputs:
+  config:
+    description: 'Path to config file'
+    default: '.docgap.yaml'
+  strict:
+    description: 'Fail build on drift'
+    default: 'false'
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+branding:
+  icon: 'book'
+  color: 'blue'

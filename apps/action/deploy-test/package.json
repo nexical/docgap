@@ -4,9 +4,8 @@
     "version": "0.1.0",
     "main": "dist/index.js",
     "scripts": {
-        "build": "tsc",
-        "dev": "tsc --watch",
-        "start": "node dist/index.js",
+        "build": "ncc build src/index.ts -o dist --license licenses.txt && cp $(find ../../node_modules -name tiktoken_bg.wasm | grep -v lite | head -n 1) dist/ && mkdir -p dist/tinypool-dist && cp -r $(find ../../node_modules -type d -path \"*/tinypool/dist\" | grep \"tinypool@2.0.0\" | head -n 1)/* dist/tinypool-dist/ && node scripts/patch-dist.js",
+        "dev": "ncc build src/index.ts -o dist -w",
         "test:unit": "vitest run tests/unit --coverage",
         "test:integration": "vitest run tests/integration"
     },
