@@ -4,7 +4,7 @@
     "version": "0.1.0",
     "main": "dist/index.js",
     "scripts": {
-        "build": "ncc build src/index.ts -o dist --license licenses.txt && cp $(find ../../node_modules -name tiktoken_bg.wasm | grep -v lite | head -n 1) dist/ && sed -i 's/loadLanguage_require(\"url\")/require(\"url\")/g' dist/index.js && sed -i \"s/runtime: 'worker_threads'/runtime: 'child_process'/g\" dist/index.js && mkdir -p dist/entry && cp dist/process.js dist/entry/process.js",
+        "build": "ncc build src/index.ts -o dist --license licenses.txt && cp $(find ../../node_modules -name tiktoken_bg.wasm | grep -v lite | head -n 1) dist/ && sed -i 's/loadLanguage_require(\"url\")/require(\"url\")/g' dist/index.js && sed -i \"s/runtime: 'worker_threads'/runtime: 'child_process'/g\" dist/index.js && mkdir -p dist/entry && cp $(find ../../node_modules -name process.js | grep tinypool | head -n 1) dist/entry/process.js",
         "dev": "ncc build src/index.ts -o dist -w",
         "test:unit": "vitest run tests/unit --coverage",
         "test:integration": "vitest run tests/integration"
