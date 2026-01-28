@@ -19,7 +19,9 @@ jobs:
         run: npm install
 
       - name: Build Action
-        run: npm run build -w @docgap/action
+        run: |
+          npm run build -w @docgap/core
+          npm run build -w @docgap/action
 
       - name: Run Drift Check (Dogfood)
         run: node apps/action/dist/index.js
@@ -77,7 +79,9 @@ jobs:
         run: npm install
 
       - name: Build Action
-        run: npm run build -w @docgap/action
+        run: |
+          npm run build -w @docgap/core
+          npm run build -w @docgap/action
 
       - name: Commit and Push dist
         # We only want to commit the compiled dist for the action
