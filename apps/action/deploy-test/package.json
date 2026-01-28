@@ -1,7 +1,7 @@
 {
     "name": "@docgap/action",
     "private": true,
-    "version": "0.1.0",
+    "version": "0.2.0",
     "main": "dist/index.js",
     "scripts": {
         "build": "ncc build src/index.ts -o dist --license licenses.txt && cp $(find ../../node_modules -name tiktoken_bg.wasm | grep -v lite | head -n 1) dist/ && mkdir -p dist/tinypool-dist && cp -r $(find ../../node_modules -type d -path \"*/tinypool/dist\" | grep \"tinypool@2.0.0\" | head -n 1)/* dist/tinypool-dist/ && node scripts/patch-dist.js",
@@ -12,7 +12,7 @@
     "dependencies": {
         "@actions/core": "^1.10.1",
         "@actions/github": "^6.0.0",
-        "@docgap/core": "workspace:*"
+        "@docgap/core": "*"
     },
     "devDependencies": {
         "@vercel/ncc": "^0.38.1",

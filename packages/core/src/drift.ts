@@ -38,18 +38,21 @@ export async function checkDrift(
 
         // 4. Comparison
         // If t_code is newer than t_doc -> POTENTIAL DRIFT
+        console.log(`[DEBUG] Check drift for ${sourceFile}: doc=${t_doc.date}, code=${t_code.date} (${t_code.date > t_doc.date})`);
         if (t_code.date > t_doc.date) {
 
             // Phase 2 (Semantic Verification)
+
             const strict = config.semantic?.strict ?? false;
             const semanticEnabled = config.semantic?.enabled ?? true;
+
+            console.log(`[DEBUG] Config: strict=${strict}, semantic=${semanticEnabled}`);
 
             if (!strict && semanticEnabled) {
                 // Fetch Source_Current (content at HEAD/FS)
                 const sourceCurrent = await getFileContent(sourceFile);
 
                 // Fetch Source_Old (content at t_doc commit hash)
-                // We compare against the state of the code when the doc was last updated.
                 const sourceOld = await getFileContentAtCommit(sourceFile, t_doc.hash);
 
                 const sigCurrent = await getSemanticHash(sourceCurrent, '.' + (sourceFile.split('.').pop() || 'ts'));

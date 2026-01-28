@@ -1,6 +1,6 @@
 {
     "name": "@nexical/docgap",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "CLI for DocGap",
     "type": "module",
     "bin": {
@@ -22,7 +22,7 @@
         "prepublishOnly": "npm run build"
     },
     "dependencies": {
-        "@docgap/core": "workspace:*",
+        "@docgap/core": "*",
         "cac": "^6.7.14",
         "cli-table3": "^0.6.3",
         "ora": "^8.0.0",

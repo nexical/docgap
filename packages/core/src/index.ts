@@ -76,7 +76,7 @@ export async function runAnalysis(cwd: string, config?: DocGapConfig): Promise<F
     for (const rule of config.rules) {
         // Expand doc glob
         // We use fast-glob to find all doc files matching the rule.doc pattern
-        const docFiles = await fg(rule.doc, { cwd, absolute: true });
+        const docFiles = await fg(rule.doc, { cwd, absolute: false });
 
         for (const docFile of docFiles) {
             // Determine source files for this doc
@@ -93,7 +93,7 @@ export async function runAnalysis(cwd: string, config?: DocGapConfig): Promise<F
             // Expand source globs, applying both rule-level and global ignores
             const sourceFiles = await fg(sourcePatterns, {
                 cwd,
-                absolute: true,
+                absolute: false,
                 ignore: [...(rule.ignore || []), ...globalIgnore]
             });
 

@@ -27,9 +27,12 @@ export async function normalizeViaRepomix(content: string, extension: string): P
                 removeComments: true,
                 removeEmptyLines: true,
             },
-            include: [],
+            input: {
+                maxFileSize: 10 * 1024 * 1024,
+            },
+            include: ['**/*'],
             ignore: {
-                useGitignore: true,
+                useGitignore: false,
                 useDotIgnore: true,
                 useDefaultPatterns: true,
                 customPatterns: [],
