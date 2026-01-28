@@ -1,6 +1,6 @@
 {
     "name": "@nexical/docgap",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "description": "CLI for DocGap",
     "type": "module",
     "bin": {
